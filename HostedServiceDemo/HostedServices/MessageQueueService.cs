@@ -2,13 +2,14 @@
 using MassTransit.Azure.ServiceBus.Core;
 using Microsoft.Azure.ServiceBus.Primitives;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SharedContract;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace HostedServiceDemo.HostedServices
 {
@@ -32,9 +33,11 @@ namespace HostedServiceDemo.HostedServices
 
                 cfg.ReceiveEndpoint(host, Constant.DemoQueueName, efg =>
                 {
-                    efg.Handler<SubmitOrder>(context => {
-                        _logger.LogInformation($"recevie {nameof(SubmitOrder)} data");
-                        return context.RespondAsync<OrderAccepted>(new { context.Message.OrderId });
+                    efg.Handler<ISubmitOrder>(context =>
+                    {
+                        var receiveData = context.Message;
+                        _logger.LogInformation($"receive data: {JsonConvert.SerializeObject(receiveData)}");
+                        return context.RespondAsync<IOrderAccepted>(new { receiveData.OrderId });
                     });
                 });
             });
@@ -42,12 +45,13 @@ namespace HostedServiceDemo.HostedServices
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            return _bus.StartAsync();
+            _logger.LogInformation("Start service bus...");
+            return _bus.StartAsync(stoppingToken);
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {
-            return Task.WhenAll(base.StopAsync(cancellationToken), _bus.StopAsync());
+            return Task.WhenAll(base.StopAsync(cancellationToken), _bus.StopAsync(cancellationToken));
         }
     }
 }

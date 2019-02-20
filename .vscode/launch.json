@@ -1,0 +1,60 @@
+{
+    // Use IntelliSense to find out which attributes exist for C# debugging
+    // Use hover for the description of the existing attributes
+    // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+    "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "Demo Web & Backend",
+            "configurations": [
+                "Launch Backend",
+                "Launch Web Client"
+            ]
+        }
+    ],
+    "configurations": [
+        {
+            "name": "Launch Backend",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build_backend",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/HostedServiceDemo/bin/Debug/netcoreapp2.2/HostedServiceDemo.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/HostedServiceDemo",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "externalTerminal",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Launch Web Client",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build_web",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/WebDemo/bin/Debug/netcoreapp2.2/WebDemo.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/WebDemo",
+            "console": "externalTerminal",
+            "stopAtEntry": false,
+            "launchBrowser": {
+                "enabled": true,
+                "args": "${auto-detect-url}",
+                "windows": {
+                    "command": "cmd.exe",
+                    "args": "/C start ${auto-detect-url}"
+                },
+                "osx": {
+                    "command": "open"
+                },
+                "linux": {
+                    "command": "xdg-open"
+                }
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+    ]
+}

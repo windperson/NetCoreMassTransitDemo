@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharedContract
 {
-    public interface SubmitOrder
+    public interface IOrderAccepted
     {
         string OrderId { get; }
     }

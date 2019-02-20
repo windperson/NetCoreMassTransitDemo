@@ -14,11 +14,11 @@ namespace WebDemo.Controllers.Api
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly IRequestClient<SubmitOrder, OrderAccepted> _requestClient;
+        private readonly IRequestClient<ISubmitOrder, IOrderAccepted> _requestClient;
 
         private ILogger<OrderController> _logger { get; }
 
-        public OrderController(IRequestClient<SubmitOrder, OrderAccepted> requestClient, ILogger<OrderController> logger)
+        public OrderController(IRequestClient<ISubmitOrder, IOrderAccepted> requestClient, ILogger<OrderController> logger)
         {
             _requestClient = requestClient;
             _logger = logger;

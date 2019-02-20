@@ -12,20 +12,19 @@ namespace HostedServiceDemo
     {
         static async Task Main(string[] args)
         {
-            var logConfig = new LoggerConfiguration()
-                //.MinimumLevel.Information()
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.Trace()
-                .WriteTo.Debug();
-
-            Log.Logger = logConfig
+                .WriteTo.Debug()
                 .Enrich.FromLogContext().CreateLogger();
 
-            var builder = new HostBuilder().ConfigureServices((hostContext, services) => {
+            var builder = new HostBuilder().ConfigureServices((hostContext, services) =>
+            {
                 services.AddHostedService<MessageQueueService>();
-            });
+            }).UseSerilog();
 
             await builder.RunConsoleAsync();
         }

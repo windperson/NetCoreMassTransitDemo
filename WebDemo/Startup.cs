@@ -55,8 +55,8 @@ namespace WebDemo
 
             var serviceAddress = new Uri($"{ConstantForAzureServiceBus.ServiceBusUrl}/{Constant.DemoQueueName}");
 
-            services.AddScoped<IRequestClient<SubmitOrder, OrderAccepted>>(x =>
-                new MessageRequestClient<SubmitOrder, OrderAccepted>(x.GetRequiredService<IBus>(), serviceAddress, timeout, timeout)
+            services.AddScoped<IRequestClient<ISubmitOrder, IOrderAccepted>>(x =>
+                new MessageRequestClient<ISubmitOrder, IOrderAccepted>(x.GetRequiredService<IBus>(), serviceAddress, timeout, timeout)
             );
 
             bus.Start();
