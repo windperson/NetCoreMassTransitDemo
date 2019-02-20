@@ -36,7 +36,7 @@ namespace HostedServiceDemo.HostedServices
                     efg.Handler<ISubmitOrder>(context =>
                     {
                         var receiveData = context.Message;
-                        _logger.LogInformation($"receive data: {JsonConvert.SerializeObject(receiveData)}");
+                        _logger.LogInformation("receive data: {@1}", receiveData);
                         return context.RespondAsync<IOrderAccepted>(new { receiveData.OrderId });
                     });
                 });
