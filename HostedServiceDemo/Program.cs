@@ -9,18 +9,18 @@ using HostedServiceDemo.Consumer;
 using MassTransit;
 using MassTransit.Azure.ServiceBus.Core;
 using Microsoft.Azure.ServiceBus.Primitives;
+using MassTransit.SerilogIntegration;
 using SharedContract;
 
 namespace HostedServiceDemo
 {
     class Program
     {
-        static async Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
+                .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.Trace()
                 .WriteTo.Debug()
@@ -45,9 +45,11 @@ namespace HostedServiceDemo
                 })
                 .UseSerilog();
 
-        private static IBusControl AzureServiceBusFactory(IServiceProvider provider)
-        {
-            return Bus.Factory.CreateUsingAzureServiceBus(config => {
+
+        private static IBusControl AzureServiceBusFactory(IServiceProvider provider) =>
+            Bus.Factory.CreateUsingAzureServiceBus(config =>
+            {
+                config.UseSerilog();
                 var host = config.Host(new Uri(ConstantForAzureServiceBus.ServiceBusUrl), hostCfg =>
                 {
                     hostCfg.TokenProvider =
@@ -63,6 +65,5 @@ namespace HostedServiceDemo
                     configurator.ConfigureConsumer<OrderConsumer>(provider);
                 });
             });
-        }
     }
 }

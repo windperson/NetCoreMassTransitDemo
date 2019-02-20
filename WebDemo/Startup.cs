@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using MassTransit;
+using MassTransit.AspNetCoreIntegration;
 using MassTransit.Azure.ServiceBus.Core;
+using MassTransit.ExtensionsDependencyInjectionIntegration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.ServiceBus.Primitives;
 using Microsoft.Extensions.Configuration;
@@ -35,32 +33,36 @@ namespace WebDemo
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            var bus = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
+            services.AddMassTransit(CreateAzureServiceBus, ConfigServiceBus);
+        }
+
+        private static IBusControl CreateAzureServiceBus(IServiceProvider provider)
+        {
+            return Bus.Factory.CreateUsingAzureServiceBus(config =>
             {
-                var host = cfg.Host(new Uri(ConstantForAzureServiceBus.ServiceBusUrl), hostCfg =>
+                config.UseSerilog();
+                var host = config.Host(new Uri(ConstantForAzureServiceBus.ServiceBusUrl), hostCfg =>
                 {
-                    hostCfg.OperationTimeout = TimeSpan.FromSeconds(10);
-                    hostCfg.TokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(ConstantForAzureServiceBus.KeyName, @"Nk8YFq5WKvVFM0sp+DAh9spopa/gUxBYQps0VF4rJi4=");
+                    hostCfg.TokenProvider =
+                        TokenProvider.CreateSharedAccessSignatureTokenProvider(
+                            ConstantForAzureServiceBus.KeyName,
+                            @"Nk8YFq5WKvVFM0sp+DAh9spopa/gUxBYQps0VF4rJi4=");
+
+                    //hostCfg.OperationTimeout = TimeSpan.FromSeconds(10);
                 });
             });
-
-            services.AddSingleton<IBus>(bus);
-            services.AddSingleton<IPublishEndpoint>(bus);
-            services.AddSingleton<ISendEndpointProvider>(bus);
-
-            var timeout = TimeSpan.FromSeconds(10);
-
-            var serviceAddress = new Uri($"{ConstantForAzureServiceBus.ServiceBusUrl}/{Constant.DemoQueueName}");
-
-            services.AddScoped<IRequestClient<ISubmitOrder, IOrderAccepted>>(x =>
-                new MessageRequestClient<ISubmitOrder, IOrderAccepted>(x.GetRequiredService<IBus>(), serviceAddress, timeout, timeout)
-            );
-
-            bus.Start();
         }
+
+        private static void ConfigServiceBus(IServiceCollectionConfigurator config)
+        {
+            var serviceAddress = new Uri($"{ConstantForAzureServiceBus.ServiceBusUrl}/{Constant.DemoQueueName}");
+            config.Collection.AddScoped<IRequestClient<ISubmitOrder, IOrderAccepted>>(x =>
+                new MessageRequestClient<ISubmitOrder, IOrderAccepted>(x.GetRequiredService<IBus>(), serviceAddress, TimeSpan.FromSeconds(10))
+            );
+        }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
