@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using HostedServiceDemo.Consumer;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -19,28 +20,11 @@ namespace HostedServiceDemo.HostedServices
 
         private readonly IBusControl _bus;
 
-        public MessageQueueService(ILogger<MessageQueueService> logger)
+        public MessageQueueService(IBusControl busControl, ILogger<MessageQueueService> logger)
         {
             _logger = logger;
 
-            _bus = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
-            {
-                var host = cfg.Host(new Uri(ConstantForAzureServiceBus.ServiceBusUrl), hostCfg =>
-                {
-                    hostCfg.OperationTimeout = TimeSpan.FromSeconds(10);
-                    hostCfg.TokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(ConstantForAzureServiceBus.KeyName, @"Nk8YFq5WKvVFM0sp+DAh9spopa/gUxBYQps0VF4rJi4=");
-                });
-
-                cfg.ReceiveEndpoint(host, Constant.DemoQueueName, efg =>
-                {
-                    efg.Handler<ISubmitOrder>(context =>
-                    {
-                        var receiveData = context.Message;
-                        _logger.LogInformation("receive data: {@1}", receiveData);
-                        return context.RespondAsync<IOrderAccepted>(new { receiveData.OrderId });
-                    });
-                });
-            });
+            _bus = busControl;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
