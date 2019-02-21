@@ -12,7 +12,7 @@ namespace WebDemo.Controllers.Api
     {
         private readonly IRequestClient<ISubmitOrder, IOrderAccepted> _requestClient;
 
-        private ILogger<OrderController> _logger { get; }
+        private readonly    ILogger<OrderController> _logger;
 
         public OrderController(IRequestClient<ISubmitOrder, IOrderAccepted> requestClient, ILogger<OrderController> logger)
         {

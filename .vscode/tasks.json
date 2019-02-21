@@ -33,6 +33,17 @@
                 "isDefault": true
             },
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build_oneway_demo",
+            "command": "dotnet",
+            "type": "process",
+            
+            "args": [
+                "build",
+                "${workspaceFolder}/AspNetCoreDemo/AspNetCoreDemo.csproj"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }
