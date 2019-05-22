@@ -26,6 +26,9 @@ namespace WebDemo.Controllers.Api
             try
             {
                 var result = await _requestClient.Request(new { OrderId = id });
+
+                
+
                 return Accepted(result.OrderId);
             }
             catch (RequestTimeoutException ex)
